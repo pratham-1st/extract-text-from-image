@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image to Text</title>
+  <link rel="stylesheet" href="index.css">
+  <!-- Google Fonts -->
+</head>
+<body>
+
+  <!-- Heading -->
+  <div id="heading">
+    <h1 id="heading-text">Extract Text from Image</h1>
+  </div>
+
+  <!-- Image Upload Section -->
+  <div id="image-upload">
+    <input type="file" id="imageInput" accept="image/*" onchange="previewImage()">
+    <!-- Language Selection -->
+    <div id="select-language">
+      <label for="language">Select Language:</label>
+      <select id="language">
+        <option value="eng">English</option>
+        <option value="spa">Spanish</option>
+        <option value="fra">French</option>
+        <option value="deu">German</option>
+      </select>
+    </div>
+  </div>
+
+   <div id="preview">
+        <!-- Image Preview -->
+        <img id="previewImage" src="" alt="Image Preview">
+   </div>  
+
+   <div id="button-input">
+        <button id="input-button" onclick="extractText()">Extract Text</button>
+   </div>
+
+  <!-- Loading Spinner -->
+  <div id="spinner">
+    <p>Processing...</p>
+    <img src="https://i.imgur.com/LLF5iyg.gif" alt="loading spinner">
+  </div>
+
+  <!-- Extracted Text Output -->
+  <div id="extracted-image">
+    <div id="outputText"></div>
+  </div>
+
+  <!-- Tesseract.js library -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/tesseract.min.js"></script>
+  
+  <script>
+    // Preview uploaded image
+    function previewImage() {
+      const file = document.getElementById('imageInput').files[0];
+      const preview = document.getElementById('previewImage');
+      const reader = new FileReader();
+
+      reader.onloadend = function () {
+        preview.src = reader.result;
+        preview.style.display = 'block'; // Show the image once it's loaded
+      };
+
+      if (file) {
+        reader.readAsDataURL(file); // Convert the image to a Data URL (base64)
+      } else {
+        preview.src = '';
+        preview.style.display = 'none'; // Hide the image if no file is selected
+      }
+    }
+
+    // Extract text from the uploaded image
+    function extractText() {
+      const imageInput = document.getElementById('imageInput').files[0];
+      const language = document.getElementById('language').value;
+      
+      if (!imageInput) {
+        alert('Please upload an image first!');
+        return;
+      }
+
+      // Show loading spinner
+      document.getElementById('spinner').style.display = 'block';
+
+      // Use Tesseract.js to recognize text from the image
+      Tesseract.recognize(
+        imageInput,
+        language, // Language selected by the user
+        {
+          logger: (m) => console.log(m), // Optional logging
+        }
+      ).then(({ data: { text } }) => {
+        // Hide loading spinner
+        document.getElementById('spinner').style.display = 'none';
+        
+        // Display extracted text
+        document.getElementById('outputText').innerText = text;
+      }).catch(err => {
+        console.error(err);
+        
+        // Hide loading spinner and show error message
+        document.getElementById('spinner').style.display = 'none';
+        document.getElementById('outputText').innerText = 'Error occurred while processing the image!';
+      });
+    }
+  </script>
+
+</body>
+</html>
